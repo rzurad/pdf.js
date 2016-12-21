@@ -68,11 +68,18 @@ function getViewerConfiguration() {
       zoomIn: document.getElementById('zoomIn'),
       zoomOut: document.getElementById('zoomOut'),
       viewFind: document.getElementById('viewFind'),
-      openFile: document.getElementById('openFile'),
+
+      // make the openFile button an in-memory element, because we don't want it to show, but
+      // PDF.JS' viewer assumes it will have an element for it.
+      // openFile: document.getElementById('openFile'),
+      openFile: document.createElement('div'),
+
       print: document.getElementById('print'),
       presentationModeButton: document.getElementById('presentationMode'),
       download: document.getElementById('download'),
-      viewBookmark: document.getElementById('viewBookmark'),
+
+      viewBookmark: document.createElement('div')
+      // viewBookmark: document.getElementById('viewBookmark'),
     },
     secondaryToolbar: {
       toolbar: document.getElementById('secondaryToolbar'),
@@ -82,7 +89,10 @@ function getViewerConfiguration() {
       openFile: document.getElementById('secondaryOpenFile'),
       print: document.getElementById('secondaryPrint'),
       download: document.getElementById('secondaryDownload'),
-      viewBookmark: document.getElementById('secondaryViewBookmark'),
+
+      viewBookmark: document.createElement('div'),
+      // viewBookmark: document.getElementById('secondaryViewBookmark'),
+
       firstPage: document.getElementById('firstPage'),
       lastPage: document.getElementById('lastPage'),
       pageRotateCw: document.getElementById('pageRotateCw'),
@@ -104,11 +114,15 @@ function getViewerConfiguration() {
       // Buttons
       thumbnailButton: document.getElementById('viewThumbnail'),
       outlineButton: document.getElementById('viewOutline'),
-      attachmentsButton: document.getElementById('viewAttachments'),
+
+      attachmentsButton: document.createElement('div'),
+      // attachmentsButton: document.getElementById('viewAttachments'),
+
       // Views
       thumbnailView: document.getElementById('thumbnailView'),
       outlineView: document.getElementById('outlineView'),
-      attachmentsView: document.getElementById('attachmentsView'),
+      attachmentsView: document.createElement('div'),
+      // attachmentsView: document.getElementById('attachmentsView'),
     },
     findBar: {
       bar: document.getElementById('findbar'),
