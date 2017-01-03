@@ -255,4 +255,4 @@ function webViewerLoad() {
 }
 
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded, true);
-window.addEventListener('message', recieveMessage, false);
+window.addEventListener('message', receiveMessage, false);
