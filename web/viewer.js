@@ -240,8 +240,25 @@ function onDOMContentLoaded() {
   sendMessage('ready');
 }
 
-function webViewerLoad() {
+function webViewerLoad(allowPrinting, allowDownloading) {
   var config = getViewerConfiguration();
+
+  if (IS_INITIALIZED) {
+      console.error('Cannot initialize PDF.JS iframe. It is already initialized.');
+      return;
+  }
+
+  if (allowDownloading) {
+    insertAfter(document.getElementById('secondaryPresentationMode'), secondaryDownloadNode);
+    insertAfter(document.getElementById('presentationMode'), downloadNode);
+  }
+
+  if (allowPrinting) {
+    insertAfter(document.getElementById('outerContainer'), printContainerNode);
+    insertAfter(document.getElementById('secondaryPresentationMode'), secondaryPrintNode);
+    insertAfter(document.getElementById('presentationMode'), printNode);
+  }
+
 //#if !PRODUCTION
   require.config({paths: {'pdfjs': '../src', 'pdfjs-web': '.'}});
   require(['pdfjs-web/app'], function (web) {
@@ -252,6 +269,7 @@ function webViewerLoad() {
 //window.PDFViewerApplication = pdfjsWebLibs.pdfjsWebApp.PDFViewerApplication;
 //pdfjsWebLibs.pdfjsWebApp.PDFViewerApplication.run(config);
 //#endif
+  IS_INITIALIZED = true;
 }
 
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded, true);
