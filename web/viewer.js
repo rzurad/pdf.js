@@ -17,6 +17,50 @@
 'use strict';
 
 var DEFAULT_URL = 'compressed.tracemonkey-pldi-09.pdf';
+var IS_INITIALIZED = false;
+var printContainerNode = document.createElement('div');
+var printLabelNode = document.createElement('span');
+var printNode = document.createElement('button');
+var secondaryPrintNode = document.createElement('button');
+var downloadNode = document.createElement('button');
+var secondaryDownloadNode = document.createElement('button');
+var downloadLabelNode = document.createElement('span');
+
+printContainerNode.setAttribute('id', 'printContainer');
+
+printLabelNode.setAttribute('data-l10n-id', 'print_label');
+printLabelNode.innerText = 'Print';
+
+printNode.setAttribute('id', 'print');
+printNode.setAttribute('class', 'toolbarButton print hiddenMediumView');
+printNode.setAttribute('title', 'Print');
+printNode.setAttribute('tabindex', 33);
+printNode.setAttribute('data-l10n-id', 'print');
+printNode.appendChild(printLabelNode);
+
+secondaryPrintNode.setAttribute('id', 'secondaryPrint');
+secondaryPrintNode.setAttribute('class', 'secondaryToolbarButton print visibleMediumView');
+secondaryPrintNode.setAttribute('title', 'Print');
+secondaryPrintNode.setAttribute('tabindex', 53);
+secondaryPrintNode.setAttribute('data-l10n-id', 'print');
+secondaryPrintNode.appendChild(printLabelNode);
+
+downloadLabelNode.setAttribute('data-l10n-id', 'download_label');
+downloadLabelNode.innerText = 'Download';
+
+downloadNode.setAttribute('id', 'download');
+downloadNode.setAttribute('class', 'toolbarButton download hiddenMediumView');
+downloadNode.setAttribute('title', 'Download');
+downloadNode.setAttribute('tabindex', 34);
+downloadNode.setAttribute('data-l10n-id', 'download');
+downloadNode.appendChild(downloadLabelNode);
+
+secondaryDownloadNode.setAttribute('id', 'secondaryDownload');
+secondaryDownloadNode.setAttribute('class', 'secondaryToolbarButton download visibleMediumView');
+secondaryDownloadNode.setAttribute('title', 'Download');
+secondaryDownloadNode.setAttribute('tabindex', 54);
+secondaryDownloadNode.setAttribute('data-l10n-id', 'download');
+secondaryDownloadNode.appendChild(downloadLabelNode);
 
 //#if PRODUCTION
 //var pdfjsWebLibs = {
@@ -68,18 +112,11 @@ function getViewerConfiguration() {
       zoomIn: document.getElementById('zoomIn'),
       zoomOut: document.getElementById('zoomOut'),
       viewFind: document.getElementById('viewFind'),
-
-      // make the openFile button an in-memory element, because we don't want it to show, but
-      // PDF.JS' viewer assumes it will have an element for it.
-      // openFile: document.getElementById('openFile'),
       openFile: document.createElement('div'),
-
-      print: document.getElementById('print'),
+      print: printNode,
       presentationModeButton: document.getElementById('presentationMode'),
-      download: document.getElementById('download'),
-
+      download: downloadNode,
       viewBookmark: document.createElement('div')
-      // viewBookmark: document.getElementById('viewBookmark'),
     },
     secondaryToolbar: {
       toolbar: document.getElementById('secondaryToolbar'),
@@ -87,12 +124,9 @@ function getViewerConfiguration() {
       presentationModeButton:
         document.getElementById('secondaryPresentationMode'),
       openFile: document.getElementById('secondaryOpenFile'),
-      print: document.getElementById('secondaryPrint'),
-      download: document.getElementById('secondaryDownload'),
-
+      print: secondaryPrintNode,
+      download: secondaryDownloadNode,
       viewBookmark: document.createElement('div'),
-      // viewBookmark: document.getElementById('secondaryViewBookmark'),
-
       firstPage: document.getElementById('firstPage'),
       lastPage: document.getElementById('lastPage'),
       pageRotateCw: document.getElementById('pageRotateCw'),
@@ -114,15 +148,12 @@ function getViewerConfiguration() {
       // Buttons
       thumbnailButton: document.getElementById('viewThumbnail'),
       outlineButton: document.getElementById('viewOutline'),
-
       attachmentsButton: document.createElement('div'),
-      // attachmentsButton: document.getElementById('viewAttachments'),
 
       // Views
       thumbnailView: document.getElementById('thumbnailView'),
       outlineView: document.getElementById('outlineView'),
-      attachmentsView: document.createElement('div'),
-      // attachmentsView: document.getElementById('attachmentsView'),
+      attachmentsView: document.createElement('div')
     },
     findBar: {
       bar: document.getElementById('findbar'),
@@ -171,9 +202,42 @@ function getViewerConfiguration() {
       moreInfoButton: document.getElementById('errorShowMore'),
       lessInfoButton: document.getElementById('errorShowLess'),
     },
-    printContainer: document.getElementById('printContainer'),
+    printContainer: printContainerNode,
     openFileInputName: 'fileInput',
   };
+}
+
+function insertAfter(referenceNode, newNode) {
+  referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
+
+function sendMessage(msg) {
+  if (window === window.parent) {
+    return;
+  }
+
+  window.parent.postMessage(msg, window.location.origin);
+}
+
+function receiveMessage(e) {
+  if (e.origin !== window.location.origin) {
+    return;
+  }
+
+  switch (e.data.type) {
+    case 'initialize':
+      webViewerLoad(e.data.allowPrinting, e.data.allowDownloading);
+      // intentional fall-through case statement. 'initialize' should also 'open'
+    case 'open':
+      PDFViewerApplication.open(e.data.url);
+      break;
+    default:
+      console.warn('no handler for message type:', e.data.type);
+  }
+}
+
+function onDOMContentLoaded() {
+  sendMessage('ready');
 }
 
 function webViewerLoad() {
@@ -190,4 +254,5 @@ function webViewerLoad() {
 //#endif
 }
 
-document.addEventListener('DOMContentLoaded', webViewerLoad, true);
+document.addEventListener('DOMContentLoaded', onDOMContentLoaded, true);
+window.addEventListener('message', recieveMessage, false);
